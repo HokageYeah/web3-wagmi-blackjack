@@ -27,7 +27,7 @@ export class NocoDBClient {
   // 读取所有记录
   async getAllRecords(): Promise<BlackJackRecord[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v2/tables/${this.tableName}/records`, {
+      const response = await fetch(`${this.baseUrl}/api/v2/meta/tables/${this.tableName}/records`, {
         method: 'GET',
         headers: this.getHeaders(),
       });

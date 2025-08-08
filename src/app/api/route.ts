@@ -1,5 +1,5 @@
 // API实现，前后端不分离项目
-import { nocoDBClient } from '@/app/api/lib/nocodb';
+import { nocoDBClient } from '@/libs/nocodb';
 
 // when the game is inited, get player and dealer 2 random cards respectively
 export interface Card {
@@ -43,7 +43,7 @@ export async function GET() {
 
     // 从 NocoDB 加载最新分数
     try {
-        gameState.score = await nocoDBClient.getLatestScore();
+        // gameState.score = await nocoDBClient.getLatestScore();
     } catch (error) {
         console.error('加载分数失败:', error);
         gameState.score = 0;

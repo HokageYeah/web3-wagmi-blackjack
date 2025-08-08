@@ -1,4 +1,4 @@
-import { nocoDBClient } from '@/app/api/lib/nocodb';
+import { nocoDBClient } from '@/libs/nocodb';
 import { NextRequest } from 'next/server';
 
 // GET /api/score - 获取当前分数
