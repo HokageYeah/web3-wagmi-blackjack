@@ -43,7 +43,7 @@ export async function GET() {
 
     // 从 NocoDB 加载最新分数
     try {
-        // gameState.score = await nocoDBClient.getLatestScore();
+        gameState.score = await nocoDBClient.getLatestScore();
     } catch (error) {
         console.error('加载分数失败:', error);
         gameState.score = 0;
@@ -83,6 +83,7 @@ export async function POST(request: Request) {
             gameState.score -= 100;
             // 保存分数到 NocoDB
             try {
+                console.log('gameState.score:---1', gameState.score);
                 await nocoDBClient.saveScore(gameState.score);
             } catch (error) {
                 console.error('保存分数失败:', error);
@@ -92,6 +93,7 @@ export async function POST(request: Request) {
             gameState.score += 100;
             // 保存分数到 NocoDB
             try {
+                console.log('gameState.score:---2', gameState.score);
                 await nocoDBClient.saveScore(gameState.score);
             } catch (error) {
                 console.error('保存分数失败:', error);
@@ -127,6 +129,7 @@ export async function POST(request: Request) {
 
         // 保存分数到 NocoDB
         try {
+            console.log('gameState.score:---3', gameState.score);
             await nocoDBClient.saveScore(gameState.score);
         } catch (error) {
             console.error('保存分数失败:', error);

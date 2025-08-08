@@ -27,7 +27,9 @@ export class NocoDBClient {
   // 读取所有记录
   async getAllRecords(): Promise<BlackJackRecord[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v2/meta/tables/${this.tableName}/records`, {
+      const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records?limit=100`;
+      console.log('getAllRecords---reqUrl', reqUrl)
+      const response = await fetch(reqUrl, {
         method: 'GET',
         headers: this.getHeaders(),
       });
@@ -47,7 +49,9 @@ export class NocoDBClient {
   // 根据ID读取单个记录
   async getRecordById(id: number): Promise<BlackJackRecord | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v2/tables/${this.tableName}/records/${id}`, {
+      const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records/${id}`;
+      console.log('getRecordById---reqUrl', reqUrl)
+      const response = await fetch(reqUrl, {
         method: 'GET',
         headers: this.getHeaders(),
       });
@@ -69,7 +73,9 @@ export class NocoDBClient {
   // 创建新记录
   async createRecord(score: number): Promise<BlackJackRecord> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v2/tables/${this.tableName}/records`, {
+      const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records`;
+      console.log('createRecord---reqUrl', reqUrl, score)
+      const response = await fetch(reqUrl, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({
@@ -91,7 +97,9 @@ export class NocoDBClient {
   // 更新记录
   async updateRecord(id: number, score: number): Promise<BlackJackRecord> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v2/tables/${this.tableName}/records/${id}`, {
+      const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records/${id}`;
+      console.log('updateRecord---reqUrl', reqUrl)
+      const response = await fetch(reqUrl, {
         method: 'PATCH',
         headers: this.getHeaders(),
         body: JSON.stringify({
@@ -113,7 +121,9 @@ export class NocoDBClient {
   // 删除记录
   async deleteRecord(id: number): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v2/tables/${this.tableName}/records/${id}`, {
+      const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records/${id}`;
+      console.log('deleteRecord---reqUrl', reqUrl)
+      const response = await fetch(reqUrl, {
         method: 'DELETE',
         headers: this.getHeaders(),
       });
@@ -143,7 +153,7 @@ export class NocoDBClient {
         const dateB = new Date(b.created_at || '').getTime();
         return dateB - dateA;
       });
-      
+      console.log('sortedRecords----', sortedRecords)
       return sortedRecords[0].score;
     } catch (error) {
       console.error('获取最新分数失败:', error);
