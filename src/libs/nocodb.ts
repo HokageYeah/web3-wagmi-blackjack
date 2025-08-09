@@ -154,7 +154,8 @@ export class NocoDBClient {
         return dateB - dateA;
       });
       console.log('sortedRecords----', sortedRecords)
-      return sortedRecords[0].score;
+      // 如果是字符串转换成数字
+      return parseInt(`${sortedRecords[0].score || ''}`, 10);
     } catch (error) {
       console.error('获取最新分数失败:', error);
       return 0;
