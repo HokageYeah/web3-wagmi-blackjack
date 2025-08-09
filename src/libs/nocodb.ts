@@ -1,9 +1,9 @@
 // NocoDB 客户端库
 export interface BlackJackRecord {
-  id?: number;
+  Id?: number;
   score: number;
-  created_at?: string;
-  updated_at?: string;
+  CreatedAt?: string;
+  UpdatedAt?: string;
 }
 
 export class NocoDBClient {
@@ -95,14 +95,15 @@ export class NocoDBClient {
   }
 
   // 更新记录
-  async updateRecord(id: number, score: number): Promise<BlackJackRecord> {
+  async updateRecord(blackJackitem: BlackJackRecord, score: number): Promise<BlackJackRecord> {
     try {
-      const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records/${id}`;
+      const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records`;
       console.log('updateRecord---reqUrl', reqUrl)
       const response = await fetch(reqUrl, {
         method: 'PATCH',
         headers: this.getHeaders(),
         body: JSON.stringify({
+          ...blackJackitem,
           score: score,
         }),
       });
@@ -149,8 +150,8 @@ export class NocoDBClient {
       
       // 按创建时间排序，获取最新记录
       const sortedRecords = records.sort((a, b) => {
-        const dateA = new Date(a.created_at || '').getTime();
-        const dateB = new Date(b.created_at || '').getTime();
+        const dateA = new Date(a.CreatedAt || '').getTime();
+        const dateB = new Date(b.CreatedAt || '').getTime();
         return dateB - dateA;
       });
       console.log('sortedRecords----', sortedRecords)
@@ -166,21 +167,28 @@ export class NocoDBClient {
   async saveScore(score: number): Promise<BlackJackRecord> {
     try {
       const records = await this.getAllRecords();
-      
+      console.log('saveScore------records', records)
       if (records.length === 0) {
         // 没有记录，创建新记录
         return await this.createRecord(score);
       } else {
         // 更新最新记录
         const sortedRecords = records.sort((a, b) => {
-          const dateA = new Date(a.created_at || '').getTime();
-          const dateB = new Date(b.created_at || '').getTime();
+          console.log('saveScore------a--', a);
+          console.log('saveScore------a.created_at--', a.CreatedAt);
+          console.log('saveScore------b--', b);
+          console.log('saveScore------b.created_at--', b.CreatedAt);
+          const dateA = new Date(a.CreatedAt || '').getTime();
+          const dateB = new Date(b.CreatedAt || '').getTime();
+          console.log('saveScore------dateA--', dateA);
+          console.log('saveScore------dateB--', dateB);
           return dateB - dateA;
         });
         
         const latestRecord = sortedRecords[0];
-        if (latestRecord.id) {
-          return await this.updateRecord(latestRecord.id, score);
+        console.log('saveScore------latestRecord--', latestRecord, latestRecord.Id);
+        if (latestRecord.Id) {
+          return await this.updateRecord(latestRecord, score);
         } else {
           return await this.createRecord(score);
         }
