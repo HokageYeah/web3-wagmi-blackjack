@@ -1,6 +1,8 @@
 "use client"; // 添加这行表示这是一个客户端组件
 // app 目录下的组件都是服务端组件（Server Components），而`useEffect`和`useState`是客户端组件（Client Components）才可用的钩子。
 import { useEffect, useState } from "react";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount, useSignMessage } from "wagmi";
 
 export default function Page() {
   // 设置
@@ -8,6 +10,9 @@ export default function Page() {
   const [playerHand, setPlayerHand] = useState<{rank: string, suit: string}[]>([]);
   const [dealerHand, setDealerHand] = useState<{rank: string, suit: string}[]>([]);
   const [score, setScore] = useState<number>(0);
+  const { address, isConnected } = useAccount();
+  const [isSigned, setIsSigned] = useState<boolean>(false);
+  const { signMessageAsync } = useSignMessage();
   // 初始化游戏
   useEffect(() => {
     const initGame = async() => {
@@ -46,9 +51,28 @@ export default function Page() {
     setMessage(data.message);
     setScore(data.score);
   }
+  
+  async function handleSign() {
+    const message = `welcome to web3 game BlackJack at ${new Date().toLocaleString()}`;
+    const signature = await signMessageAsync({message: message});
+    const response = await fetch("/api", {method: "POST", body: JSON.stringify({
+      action: "auth",
+      address: address,
+      message: message,
+      signature: signature
+    })});
+    if(response.status === 200) {
+      setIsSigned(true);
+    } else {
+      alert("Signature verification failed");
+      setIsSigned(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-2 items-center justify-center h-screen bg-gray-300">
+      <ConnectButton />
+      <button className="border-black bg-amber-300 p-2 rounded-md">sign with your wallet</button>
       <h1 className="text-3xl bold">Welcome to web3 game BlackJack</h1>
       <h2 className={`text-2xl bold ${message.includes('win') ? "bg-green-300" : "bg-amber-300"}`}>Score: {score} {message}</h2>
       <div className="mt-4">

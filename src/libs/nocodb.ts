@@ -99,13 +99,21 @@ export class NocoDBClient {
     try {
       const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records`;
       console.log('updateRecord---reqUrl', reqUrl)
+      console.log('updateRecord---blackJackitem--obj', {
+        ...blackJackitem,
+        score: score,
+      })
+      console.log('updateRecord---blackJackitem--str', JSON.stringify({
+        ...blackJackitem,
+        score: score,
+      }))
       const response = await fetch(reqUrl, {
         method: 'PATCH',
         headers: this.getHeaders(),
-        body: JSON.stringify({
-          ...blackJackitem,
+        body: JSON.stringify([{
+          Id: blackJackitem.Id,
           score: score,
-        }),
+        }]),
       });
 
       if (!response.ok) {
