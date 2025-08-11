@@ -13,22 +13,19 @@ export default function Page() {
   const { address, isConnected } = useAccount();
   const [isSigned, setIsSigned] = useState<boolean>(false);
   const { signMessageAsync } = useSignMessage();
-  // 初始化游戏
-  useEffect(() => {
-    const initGame = async() => {
-      const response = await fetch("/api", {method: "GET"});
-      const data = await response.json();
-      console.log('data', data);
-      setPlayerHand(data.playerHand);
-      setDealerHand(data.dealerHand);
-      setMessage(data.message);
-      setScore(data.score);
-    };
-    initGame();
-  }, []);
+
+  const initGame = async() => {
+    const response = await fetch(`/api?address=${address}`, {method: "GET"});
+    const data = await response.json();
+    console.log('data', data);
+    setPlayerHand(data.playerHand);
+    setDealerHand(data.dealerHand);
+    setMessage(data.message);
+    setScore(data.score);
+  };
   
   async function hit() {
-    const response = await fetch("/api", {method: "POST", body: JSON.stringify({action: "hit"})});
+    const response = await fetch("/api", {method: "POST", body: JSON.stringify({action: "hit", address: address})});
     const data = await response.json();
     setPlayerHand(data.playerHand);
     setDealerHand(data.dealerHand);
@@ -36,7 +33,7 @@ export default function Page() {
     setScore(data.score);
   }
   async function stand() {
-    const response = await fetch("/api", {method: "POST", body: JSON.stringify({action: "stand"})});
+    const response = await fetch("/api", {method: "POST", body: JSON.stringify({action: "stand", address: address})});
     const data = await response.json();
     setPlayerHand(data.playerHand);
     setDealerHand(data.dealerHand);
@@ -44,7 +41,7 @@ export default function Page() {
     setScore(data.score);
   }
   async function reset() {
-    const response = await fetch("/api", {method: "GET"});
+    const response = await fetch(`/api?address=${address}`, {method: "GET"});
     const data = await response.json();
     setPlayerHand(data.playerHand);
     setDealerHand(data.dealerHand);
@@ -63,6 +60,7 @@ export default function Page() {
     })});
     if(response.status === 200) {
       setIsSigned(true);
+      initGame();
       console.log("Signature verification succeeded");
     } else {
       alert("Signature verification failed");
@@ -83,7 +81,6 @@ export default function Page() {
   return (
     <div className="flex flex-col gap-2 items-center justify-center h-screen bg-gray-300">
       <ConnectButton />
-      <button onClick={handleSign} className="border-black bg-amber-300 p-2 rounded-md">sign with your wallet</button>
       <h1 className="text-3xl bold">Welcome to web3 game BlackJack</h1>
       <h2 className={`text-2xl bold ${message.includes('win') ? "bg-green-300" : "bg-amber-300"}`}>Score: {score} {message}</h2>
       <div className="mt-4">

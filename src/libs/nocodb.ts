@@ -2,6 +2,7 @@
 export interface BlackJackRecord {
   Id?: number;
   score: number;
+  player: string;
   CreatedAt?: string;
   UpdatedAt?: string;
 }
@@ -25,7 +26,7 @@ export class NocoDBClient {
   }
 
   // 读取所有记录
-  async getAllRecords(): Promise<BlackJackRecord[]> {
+  async getAllRecords(address: string): Promise<BlackJackRecord[]> {
     try {
       const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records?limit=100`;
       console.log('getAllRecords---reqUrl', reqUrl)
@@ -39,6 +40,9 @@ export class NocoDBClient {
       }
 
       const data = await response.json();
+      if(address) {
+        return data.list.filter((item: BlackJackRecord) => item.player === address);
+      }
       return data.list || [];
     } catch (error) {
       console.error('获取记录失败:', error);
@@ -71,7 +75,7 @@ export class NocoDBClient {
   }
 
   // 创建新记录
-  async createRecord(score: number): Promise<BlackJackRecord> {
+  async createRecord(score: number, address: string): Promise<BlackJackRecord> {
     try {
       const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records`;
       console.log('createRecord---reqUrl', reqUrl, score)
@@ -80,6 +84,7 @@ export class NocoDBClient {
         headers: this.getHeaders(),
         body: JSON.stringify({
           score: score,
+          player: address,
         }),
       });
 
@@ -95,17 +100,19 @@ export class NocoDBClient {
   }
 
   // 更新记录
-  async updateRecord(blackJackitem: BlackJackRecord, score: number): Promise<BlackJackRecord> {
+  async updateRecord(blackJackitem: BlackJackRecord, score: number, address: string): Promise<BlackJackRecord> {
     try {
       const reqUrl =  `${this.baseUrl}/api/v2/tables/${this.tableName}/records`;
       console.log('updateRecord---reqUrl', reqUrl)
       console.log('updateRecord---blackJackitem--obj', {
         ...blackJackitem,
         score: score,
+        player: address,
       })
       console.log('updateRecord---blackJackitem--str', JSON.stringify({
         ...blackJackitem,
         score: score,
+        player: address,
       }))
       const response = await fetch(reqUrl, {
         method: 'PATCH',
@@ -113,6 +120,7 @@ export class NocoDBClient {
         body: JSON.stringify([{
           Id: blackJackitem.Id,
           score: score,
+          player: address,
         }]),
       });
 
@@ -149,9 +157,9 @@ export class NocoDBClient {
   }
 
   // 获取最新的分数记录
-  async getLatestScore(): Promise<number> {
+  async getLatestScore(players: string): Promise<number> {
     try {
-      const records = await this.getAllRecords();
+      const records = await this.getAllRecords(players);
       if (records.length === 0) {
         return 0;
       }
@@ -172,13 +180,13 @@ export class NocoDBClient {
   }
 
   // 保存当前分数（如果没有记录则创建，否则更新最新记录）
-  async saveScore(score: number): Promise<BlackJackRecord> {
+  async saveScore(score: number, address: string): Promise<BlackJackRecord> {
     try {
-      const records = await this.getAllRecords();
+      const records = await this.getAllRecords(address);
       console.log('saveScore------records', records)
       if (records.length === 0) {
         // 没有记录，创建新记录
-        return await this.createRecord(score);
+        return await this.createRecord(score, address);
       } else {
         // 更新最新记录
         const sortedRecords = records.sort((a, b) => {
@@ -196,9 +204,9 @@ export class NocoDBClient {
         const latestRecord = sortedRecords[0];
         console.log('saveScore------latestRecord--', latestRecord, latestRecord.Id);
         if (latestRecord.Id) {
-          return await this.updateRecord(latestRecord, score);
+          return await this.updateRecord(latestRecord, score, address);
         } else {
-          return await this.createRecord(score);
+          return await this.createRecord(score, address);
         }
       }
     } catch (error) {

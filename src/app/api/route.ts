@@ -1,6 +1,7 @@
 // API实现，前后端不分离项目
 import { nocoDBClient } from '@/libs/nocodb';
 import { verifyMessage } from 'viem';
+import jwt from 'jsonwebtoken';
 
 // when the game is inited, get player and dealer 2 random cards respectively
 export interface Card {
@@ -16,13 +17,15 @@ const gameState: {
     dealerHand: Card[],
     deck: Card[],
     message: string,
-    score: number
+    score: number,
+    address: string
 } = {
     playerHand: [],
     dealerHand: [],
     deck: initialDeck,
     message: "",
-    score: 0
+    score: 0,
+    address: ""
 }
 // 获取几张随机的卡牌函数
 function getRandomCard(deck: Card[], count: number) {
@@ -35,16 +38,24 @@ function getRandomCard(deck: Card[], count: number) {
     const remainingDeck = deck.filter((_, index) => !randomIndexSet.has(index));
     return [randomCards, remainingDeck]
 }
-export async function GET() {
+export async function GET(request: Request) {
+    const url = new URL(request.url);
+    const address = url.searchParams.get('address');
+    if(!address) {
+        return new Response(JSON.stringify({ message: 'address is required' }), {
+            status: 400,
+        });
+    }
     // reset the game
     gameState.playerHand = [];
     gameState.dealerHand = [];
     gameState.deck = initialDeck;
     gameState.message = "";
+    gameState.address = address;
 
     // 从 NocoDB 加载最新分数
     try {
-        gameState.score = await nocoDBClient.getLatestScore();
+        gameState.score = await nocoDBClient.getLatestScore(address);
     } catch (error) {
         console.error('加载分数失败:', error);
         gameState.score = 0;
@@ -73,7 +84,7 @@ export async function GET() {
 // when hit is clicked, get a random card from the deck and add it to the player hand 
 export async function POST(request: Request) {
     const body = await request.json();
-    const { action } = body;
+    const { action, address } = body;
     if (action === 'auth') {
         const { address, message, signature } = body;
         const isValid = await verifyMessage({
@@ -86,7 +97,9 @@ export async function POST(request: Request) {
                 status: 400,
             });
         }else {
-            return new Response(JSON.stringify({ message: 'Valid signature' }), {
+            // jwt设置
+            const token =  jwt.sign({ address }, process.env.JWT_SECRET || '', { expiresIn: '1h' })
+            return new Response(JSON.stringify({ message: 'Valid signature', jsonwebtoken: token }), {
                 status: 200,
             });
         }
@@ -103,7 +116,7 @@ export async function POST(request: Request) {
             // 保存分数到 NocoDB
             try {
                 console.log('gameState.score:---1', gameState.score);
-                await nocoDBClient.saveScore(gameState.score);
+                await nocoDBClient.saveScore(gameState.score, address);
             } catch (error) {
                 console.error('保存分数失败:', error);
             }
@@ -113,7 +126,7 @@ export async function POST(request: Request) {
             // 保存分数到 NocoDB
             try {
                 console.log('gameState.score:---2', gameState.score);
-                await nocoDBClient.saveScore(gameState.score);
+                await nocoDBClient.saveScore(gameState.score, address);
             } catch (error) {
                 console.error('保存分数失败:', error);
             }
@@ -149,7 +162,7 @@ export async function POST(request: Request) {
         // 保存分数到 NocoDB
         try {
             console.log('gameState.score:---3', gameState.score);
-            await nocoDBClient.saveScore(gameState.score);
+            await nocoDBClient.saveScore(gameState.score, address);
         } catch (error) {
             console.error('保存分数失败:', error);
         }

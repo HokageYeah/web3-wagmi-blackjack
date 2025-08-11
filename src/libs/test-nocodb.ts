@@ -18,7 +18,7 @@ export async function testNocoDBOperations() {
 
     // 3. 获取最新分数
     console.log('3. 获取最新分数...');
-    const latestScore = await nocoDBClient.getLatestScore();
+    const latestScore = await nocoDBClient.getLatestScore('');
     console.log('最新分数:', latestScore);
 
     // 4. 更新分数
