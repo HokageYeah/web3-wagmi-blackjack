@@ -69,6 +69,16 @@ export default function Page() {
       setIsSigned(false);
     }
   }
+  if(!isSigned) {
+    return (
+      <div className="flex flex-col gap-2 items-center justify-center h-screen bg-gray-300">
+        <ConnectButton />
+        <h1 className="text-3xl bold">Welcome to web3 game BlackJack</h1>
+        <h2 className="text-2xl bold">Please connect your wallet</h2>
+        <button onClick={handleSign} className="border-black bg-amber-300 p-2 rounded-md">sign with your wallet</button>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-2 items-center justify-center h-screen bg-gray-300">
