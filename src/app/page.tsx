@@ -63,6 +63,7 @@ export default function Page() {
     })});
     if(response.status === 200) {
       setIsSigned(true);
+      console.log("Signature verification succeeded");
     } else {
       alert("Signature verification failed");
       setIsSigned(false);
@@ -72,7 +73,7 @@ export default function Page() {
   return (
     <div className="flex flex-col gap-2 items-center justify-center h-screen bg-gray-300">
       <ConnectButton />
-      <button className="border-black bg-amber-300 p-2 rounded-md">sign with your wallet</button>
+      <button onClick={handleSign} className="border-black bg-amber-300 p-2 rounded-md">sign with your wallet</button>
       <h1 className="text-3xl bold">Welcome to web3 game BlackJack</h1>
       <h2 className={`text-2xl bold ${message.includes('win') ? "bg-green-300" : "bg-amber-300"}`}>Score: {score} {message}</h2>
       <div className="mt-4">

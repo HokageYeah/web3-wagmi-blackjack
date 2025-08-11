@@ -1,5 +1,6 @@
 // API实现，前后端不分离项目
 import { nocoDBClient } from '@/libs/nocodb';
+import { verifyMessage } from 'viem';
 
 // when the game is inited, get player and dealer 2 random cards respectively
 export interface Card {
@@ -71,7 +72,25 @@ export async function GET() {
 
 // when hit is clicked, get a random card from the deck and add it to the player hand 
 export async function POST(request: Request) {
-    const { action } = await request.json()
+    const body = await request.json();
+    const { action } = body;
+    if (action === 'auth') {
+        const { address, message, signature } = body;
+        const isValid = await verifyMessage({
+            address,
+            message,
+            signature,
+        });
+        if (!isValid) {
+            return new Response(JSON.stringify({ message: 'Invalid signature' }), {
+                status: 400,
+            });
+        }else {
+            return new Response(JSON.stringify({ message: 'Valid signature' }), {
+                status: 200,
+            });
+        }
+    }
     if (action === "hit") {
         const [cards, newDeck] = getRandomCard(gameState.deck, 1)
         gameState.playerHand.push(...cards);
