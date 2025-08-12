@@ -104,6 +104,20 @@ export async function POST(request: Request) {
             });
         }
     }
+    // 检查请求有没有带着token
+    const token = request.headers.get('bearer')?.split(' ')[1];
+    if (!token) {
+        return new Response(JSON.stringify({ message: 'No token provided' }), {
+            status: 401,
+        });
+    }
+    const decode = jwt.verify(token, process.env.JWT_SECRET || '') as {address: string};
+    if(decode.address.toLocaleLowerCase() !== address.toLocaleLowerCase()) {
+        return new Response(JSON.stringify({ message: 'Invalid token' }), {
+            status: 401,
+        });
+    }
+
     if (action === "hit") {
         const [cards, newDeck] = getRandomCard(gameState.deck, 1)
         gameState.playerHand.push(...cards);

@@ -25,7 +25,13 @@ export default function Page() {
   };
   
   async function hit() {
-    const response = await fetch("/api", {method: "POST", body: JSON.stringify({action: "hit", address: address})});
+    const response = await fetch("/api", {
+      method: "POST",
+      headers: {
+        bearer: `Bearer ${localStorage.getItem("jwt") || ""}`
+      }, 
+      body: JSON.stringify({action: "hit", address: address})
+    });
     const data = await response.json();
     setPlayerHand(data.playerHand);
     setDealerHand(data.dealerHand);
@@ -33,7 +39,13 @@ export default function Page() {
     setScore(data.score);
   }
   async function stand() {
-    const response = await fetch("/api", {method: "POST", body: JSON.stringify({action: "stand", address: address})});
+    const response = await fetch("/api", {
+      method: "POST", 
+      headers: {
+        bearer: `Bearer ${localStorage.getItem("jwt") || ""}`
+      },
+      body: JSON.stringify({action: "stand", address: address})
+    });
     const data = await response.json();
     setPlayerHand(data.playerHand);
     setDealerHand(data.dealerHand);
@@ -59,6 +71,8 @@ export default function Page() {
       signature: signature
     })});
     if(response.status === 200) {
+      const { jsonwebtoken } = await response.json();
+      localStorage.setItem("jwt", jsonwebtoken);
       setIsSigned(true);
       initGame();
       console.log("Signature verification succeeded");
