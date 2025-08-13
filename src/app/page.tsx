@@ -2,7 +2,9 @@
 // app 目录下的组件都是服务端组件（Server Components），而`useEffect`和`useState`是客户端组件（Client Components）才可用的钩子。
 import { useEffect, useState } from "react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useSignMessage } from "wagmi";
+import {  useAccount, useSignMessage } from "wagmi";
+import { createPublicClient, custom, parseAbi, PublicClient, WalletClient, createWalletClient } from "viem";
+import { avalancheFuji } from "viem/chains";
 
 export default function Page() {
   // 设置
@@ -13,6 +15,8 @@ export default function Page() {
   const { address, isConnected } = useAccount();
   const [isSigned, setIsSigned] = useState<boolean>(false);
   const { signMessageAsync } = useSignMessage();
+  const [publicClient, setPublicClient] = useState<any>(null);
+  const [walletClient, setWalletClient] = useState<any>(null);
 
   const initGame = async() => {
     const response = await fetch(`/api?address=${address}`, {method: "GET"});
@@ -22,8 +26,49 @@ export default function Page() {
     setDealerHand(data.dealerHand);
     setMessage(data.message);
     setScore(data.score);
+    if(typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+      const publicClient = createPublicClient({
+        chain: avalancheFuji,
+        transport: custom(window.ethereum)
+      });
+      const walletClient = createWalletClient({
+        chain: avalancheFuji,
+        transport: custom(window.ethereum)
+      });
+      console.log("publicClient", publicClient);
+      console.log("walletClient", walletClient);
+      setPublicClient(publicClient);
+      setWalletClient(walletClient);
+    }else {
+      console.error("No wallet found");
+      alert("No wallet found");
+    }
   };
   
+  async function handleSendTx() {
+    // 1. 获取合约地址
+    const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
+    // 2. 获得abi
+    const contractAbi = parseAbi([process.env.NEXT_PUBLIC_CONTRACT_ABI || ""]);
+    // 3. publicClient -> simulate -> sendTransaction (中文解释：模拟交易，发送交易)
+    await publicClient?.simulateContract({
+      address: contractAddress,
+      abi: contractAbi,
+      functionName: "sendRequest",
+      args: [[address], address],
+      account: address,
+    });
+    // 4. walletClient -> sendTransaction (中文解释：实际发送交易)
+    const txHash = await walletClient?.sendTransaction({
+      to: contractAddress,
+      abi: contractAbi,
+      functionName: "sendRequest",
+      args: [[address], address],
+      account: address,
+    });
+    console.log("txHash", txHash);
+  }
+
   async function hit() {
     const response = await fetch("/api", {
       method: "POST",
@@ -97,6 +142,7 @@ export default function Page() {
       <ConnectButton />
       <h1 className="text-3xl bold">Welcome to web3 game BlackJack</h1>
       <h2 className={`text-2xl bold ${message.includes('win') ? "bg-green-300" : "bg-amber-300"}`}>Score: {score} {message}</h2>
+      <button onClick={handleSendTx} className="border-black bg-amber-300 p-2 rounded-md">Get NFT</button>
       <div className="mt-4">
         <h2>Dealer`s hand</h2>
         <div className="flex flex-row gap-2">
