@@ -9,8 +9,8 @@ const makeRequestSepolia = async () => {
   if (!process.env.ETHEREUM_PROVIDER_AVALANCHEFUJI) {
     throw new Error("ETHEREUM_PROVIDER_AVALANCHEFUJI not provided - check your environment variables");
   }
-  if (!process.env.AWS_API_KEY) {
-    throw new Error("AWS_API_KEY not provided - check your environment variables");
+  if (!process.env.NOCODB_API_KEY) {
+    throw new Error("NOCODB_API_KEY not provided - check your environment variables");
   }
   if (!process.env.EVM_PRIVATE_KEY) {
     throw new Error("EVM_PRIVATE_KEY not provided - check your environment variables");
@@ -28,7 +28,7 @@ const makeRequestSepolia = async () => {
   const slotIdNumber = 0;
   const expirationTimeMinutes = 1440;
 
-  const secrets = { apiKey: process.env.AWS_API_KEY };
+  const secrets = { apiKey: process.env.NOCODB_API_KEY };
 
   // Initialize ethers signer and provider to interact with the contracts onchain
   const privateKey = process.env.EVM_PRIVATE_KEY; // fetch EVM_PRIVATE_KEY
