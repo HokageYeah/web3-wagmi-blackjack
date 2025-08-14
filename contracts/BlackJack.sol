@@ -12,81 +12,79 @@ import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/
  * THIS IS AN EXAMPLE CONTRACT THAT USES UN-AUDITED CODE.
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
-contract FunctionsConsumerExample is FunctionsClient, ERC721URIStorage {
+contract FunctionsConsumerExample is FunctionsClient, ConfirmedOwner, ERC721URIStorage {
     using FunctionsRequest for FunctionsRequest.Request;
-
-    uint256 public tokenId = 0;
-    mapping(bytes32 => address) reqIdToAddr;
-    uint8 public secretsSlotId;
-    uint64 public secretsVersion;
-    uint64 public subId;
-
-
-    address public constant ROUTER_ADDR = 0xA9d587a00A31A52Ed70D6026794a8FC5E2F5dCb0;
 
     bytes32 public s_lastRequestId;
     bytes public s_lastResponse;
     bytes public s_lastError;
+    mapping(bytes32 reqId => address player)reqIdToPlayer;
+    uint256 tokenID = 0;
+
+    uint8 private  donHostedSecretsSlotID;
+    uint64 private  donHostedSecretsVersion;
+    uint64 private  subscriptionId;
+
     string constant SOURCE = 
-        "if (!secrets.apiKey) { throw Error('API key should be provided!'); } "
-        "const playerAddress = args[0]; "
-        "const apiResponse = await Functions.makeHttpRequest({ "
-            "url: `https://lambda.925110.xyz/api/nocodb-api?address=${playerAddress}`, "
-            "headers: { 'api-key': secrets.apiKey } "
+        "if (!secrets.apiKey) { throw Error('API key should be provided!')};"
+        "const playerAddress = args[0];"
+        "const apiResponse = await Functions.makeHttpRequest({"
+            "url: `https://lambda.925110.xyz/api/nocodb-api?address=${playerAddress}`,"
+            "headers: { 'api-key': secrets.apiKey }"
         "}); "
-        "if (apiResponse.error) { "
-            "console.error(apiResponse.error); "
-            "throw Error('Request failed'); "
-        "} "
-        "const { data } = apiResponse; "
-        "console.log('API response data:', JSON.stringify(data, null, 2)); "
-        "const recordsAry = data.records; "
-        "if (!recordsAry || recordsAry.length === 0) { "
-            "console.log('score does not exist'); "
-            "throw Error('score does not exist'); "
-        "} "
-        "const score = recordsAry[0].score; "
-        "return Functions.encodeUint256(parseInt(score));";
-    
-    uint32 constant GAS_LIMIT = 500_000; // 增加 gas 限制
+        "if (apiResponse.error) {"
+            "console.error(apiResponse.error);"
+            "throw Error('Request failed');"
+        "};"
+        "const { data } = apiResponse;"
+        "const recordsAry = data.records;"
+        "if (!recordsAry || recordsAry.length === 0) {"
+            "console.log('score does not exist');"
+            "throw Error('score does not exist');"
+        "};"
+        "const score = recordsAry[0].score;"
+        "return Functions.encodeInt256(parseInt(score));";
+    uint32 constant GAS_LIMIT = 300_000;
     bytes32 constant DON_ID = 0x66756e2d6176616c616e6368652d66756a692d31000000000000000000000000;
-    string constant META_DATA = "ipfs://QmPJ7k6GP2K7MXE7zfacThe4sKPhCwYdSWkh5xnQmbvtMV";
+    string constant MATA_DATA = "ipfs://QmPJ7k6GP2K7MXE7zfacThe4sKPhCwYdSWkh5xnQmbvtMV";
+    address constant ROUTER = 0xA9d587a00A31A52Ed70D6026794a8FC5E2F5dCb0;
+    
 
     error UnexpectedRequestID(bytes32 requestId);
 
     event Response(bytes32 indexed requestId, bytes response, bytes err);
 
-    constructor() FunctionsClient(ROUTER_ADDR) ERC721("BlackJack", "BJT") {}
+    constructor(
+    ) FunctionsClient(ROUTER) ConfirmedOwner(msg.sender) ERC721("BlackJack", "BJK") {}
 
-    function setConfig(uint8 _secretsSlotId, uint64 _secretsVersion, uint64 _subId) public {
-        secretsSlotId = _secretsSlotId;
-        secretsVersion = _secretsVersion;
-        subId = _subId;
+    function setDonHostSecretConfig(uint8 _slotID, uint64 _version, uint64 _sub_id) public  onlyOwner {
+        donHostedSecretsSlotID = _slotID;
+        donHostedSecretsVersion = _version;
+        subscriptionId = _sub_id;
     }
 
-
+    /**
+     * @notice Send a simple request
+     * @param args List of arguments accessible from within the source code
+     */
     function sendRequest(
         string[] memory args,
         address player
     ) external returns (bytes32 requestId) {
-        require(secretsVersion > 0, "You have to set secrets version");
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(SOURCE);
-
-        if (secretsVersion > 0) {
-            req.addDONHostedSecrets(
-                secretsSlotId,
-                secretsVersion
-            );
-        }
+        req.addDONHostedSecrets(
+            donHostedSecretsSlotID,
+            donHostedSecretsVersion
+        );
         if (args.length > 0) req.setArgs(args);
         s_lastRequestId = _sendRequest(
             req.encodeCBOR(),
-            subId,
+            subscriptionId,
             GAS_LIMIT,
             DON_ID
         );
-        reqIdToAddr[s_lastRequestId] = player;
+        reqIdToPlayer[s_lastRequestId] = player;
         return s_lastRequestId;
     }
 
@@ -107,31 +105,15 @@ contract FunctionsConsumerExample is FunctionsClient, ERC721URIStorage {
         }
         s_lastResponse = response;
         s_lastError = err;
-        
-        // 检查是否有错误
-        if (err.length > 0) {
-            emit Response(requestId, s_lastResponse, s_lastError);
-            return;
-        }
-        
-        // 检查响应是否为空
-        if (response.length == 0) {
-            emit Response(requestId, s_lastResponse, s_lastError);
-            return;
-        }
-        
-        uint256 score = abi.decode(response, (uint256)); // 修复：使用 uint256 而不是 int256
-        address player = reqIdToAddr[requestId];
-        
-        if(score > 1000) {
-            safeMint(player, META_DATA);
+        // check if the player`s score is greater than 1000
+        int256 score = abi.decode(response, (int256));
+        if(score >= 1000) {
+            // mini a token for address
+            address player = reqIdToPlayer[requestId];
+            _safeMint(player, tokenID);
+            _setTokenURI(tokenID, MATA_DATA);
+            tokenID++;
         }
         emit Response(requestId, s_lastResponse, s_lastError);
-    }
-
-    function safeMint(address player, string memory metaDataUrl) internal {
-        _safeMint(player, tokenId);
-        _setTokenURI(tokenId, metaDataUrl);
-        tokenId++;
     }
 }

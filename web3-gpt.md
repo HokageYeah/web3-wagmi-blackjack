@@ -79,6 +79,7 @@ const provider = new ethers.providers.JsonRpcProvider(
   - 游戏/抽奖获取可验证随机数（VRF）
   - 定时任务/条件触发（Automation）
   - 调用 Web API 并将结果回写链上（Functions）
+  - 跨链通信（跨链桥）(CCIP)
 - 如何使用（示例：价格预言机）：
 ```solidity
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
