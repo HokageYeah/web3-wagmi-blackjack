@@ -1,0 +1,20 @@
+{
+    "name": "Golden Dog Trophy",
+    "description": "A trophy featuring a golden-haired dog, awarded to players who reach 1000 points in the game",
+    "image": "ipfs://QmbvqwB6HjjdJosp8NN1v21p2o8HPLxhKNGLEmVqTWSyk4",
+    "external_url": "https://bloody-harlequin-mink.myfilebase.com/ipfs/QmbvqwB6HjjdJosp8NN1v21p2o8HPLxhKNGLEmVqTWSyk4",
+    "attributes": [
+      {
+        "trait_type": "Breed",
+        "value": "Golden Retriever"
+      },
+      {
+        "trait_type": "temperature",
+        "value": "average"
+      },
+      {
+        "trait_type": "color",
+        "value": "golden"
+      }
+    ]
+  } 

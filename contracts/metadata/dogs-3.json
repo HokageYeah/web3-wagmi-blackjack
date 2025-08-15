@@ -1,0 +1,28 @@
+{
+    "name": "Birthday Dog Trophy",
+    "description": "A trophy featuring a white dog celebrating birthday with a birthday hat, awarded to players who reach 1000 points in the game",
+    "image": "ipfs://QmdaVovU83ahjKeGpkjFN4GjPdGZz3X2ACk74gXkaY6KEH",
+    "external_url": "https://bloody-harlequin-mink.myfilebase.com/ipfs/QmdaVovU83ahjKeGpkjFN4GjPdGZz3X2ACk74gXkaY6KEH",
+    "attributes": [
+      {
+        "trait_type": "Breed",
+        "value": "White Dog"
+      },
+      {
+        "trait_type": "temperature",
+        "value": "celebrating"
+      },
+      {
+        "trait_type": "color",
+        "value": "white"
+      },
+      {
+        "trait_type": "accessory",
+        "value": "birthday hat"
+      },
+      {
+        "trait_type": "occasion",
+        "value": "birthday"
+      }
+    ]
+  } 

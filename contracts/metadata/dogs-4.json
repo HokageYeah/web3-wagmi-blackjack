@@ -1,0 +1,24 @@
+{
+    "name": "Black Dog Trophy",
+    "description": "A trophy featuring a black dog, awarded to players who reach 1000 points in the game",
+    "image": "ipfs://QmTx9hVenXu7LbXWG641NYB5e4tgtwH9oZdBEk1fbf9xKq",
+    "external_url": "https://bloody-harlequin-mink.myfilebase.com/ipfs/QmTx9hVenXu7LbXWG641NYB5e4tgtwH9oZdBEk1fbf9xKq",
+    "attributes": [
+      {
+        "trait_type": "Breed",
+        "value": "Black Dog"
+      },
+      {
+        "trait_type": "temperature",
+        "value": "mysterious"
+      },
+      {
+        "trait_type": "color",
+        "value": "black"
+      },
+      {
+        "trait_type": "personality",
+        "value": "elegant"
+      }
+    ]
+  } 

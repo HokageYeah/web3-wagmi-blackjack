@@ -1,0 +1,24 @@
+{
+    "name": "Golden Dog with Glasses Trophy",
+    "description": "A trophy featuring a golden-haired dog wearing glasses, awarded to players who reach 1000 points in the game",
+    "image": "ipfs://QmPsF9kH5bQPBCfuRJrW3keHe6QFpRMtYfjzTGEtnZZ15b",
+    "external_url": "https://bloody-harlequin-mink.myfilebase.com/ipfs/QmPsF9kH5bQPBCfuRJrW3keHe6QFpRMtYfjzTGEtnZZ15b",
+    "attributes": [
+      {
+        "trait_type": "Breed",
+        "value": "Golden Retriever with glasses"
+      },
+      {
+        "trait_type": "temperature",
+        "value": "hot"
+      },
+      {
+        "trait_type": "color",
+        "value": "golden"
+      },
+      {
+        "trait_type": "accessory",
+        "value": "glasses"
+      }
+    ]
+  } 
